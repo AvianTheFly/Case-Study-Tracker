@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Medicine Tracker</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $("#submitForm").submit(function(event){
+                event.preventDefault(); // Prevent default form submission
+                $.ajax({
+                    type: "POST",
+                    url: "process.php",
+                    data: $(this).serialize(),
+                    success: function(response){
+                        // Parsing the JSON response from the server
+                        var responseData = JSON.parse(response);
+                        alert(responseData.message);
+                    },
+                    error: function(xhr, status, error){
+                        // Handling any error during AJAX call
+                        alert("Error: " + xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <form id="submitForm">
+        <label for="medicine_id">Medicine ID:</label>
+        <input type="text" id="medicine_id" name="medicine_id" required><br><br>
+
+        <label for="tracking_number">Tracking Number:</label>
+        <input type="text" id="tracking_number" name="tracking_number" required><br><br>
+
+        <label for="location">Location:</label>
+        <input type="text" id="location" name="location" required><br><br>
+
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

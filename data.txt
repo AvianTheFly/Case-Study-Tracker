@@ -1,0 +1,2 @@
+{"medicine_id":"2321","tracking_number":"2142","location":"Orlando","date":"2024-01-28 18:33:08"}
+{"medicine_id":"2321","tracking_number":"2142","location":"miami","date":"2024-01-28 18:50:29"}
