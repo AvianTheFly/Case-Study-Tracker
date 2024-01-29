@@ -1,59 +1,56 @@
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-import time
 import sqlite3
+import random
 
-# Function to connect to the SQLite database
 def connect_db():
     return sqlite3.connect('medicine_tracking.db')
 
-# Function to check if the record exists in the database
-def record_exists(tracking_number):
+def add_record(medicine_id, tracking_number, location, date):
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO tracking (medicine_id, tracking_number, location, date) VALUES (?, ?, ?, ?)",
+                   (medicine_id, tracking_number, location, date))
+    conn.commit()
+    conn.close()
+
+def get_records(tracking_number):
     conn = connect_db()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM tracking WHERE tracking_number = ?", (tracking_number,))
     records = cursor.fetchall()
     conn.close()
-    return len(records) > 0
+    return records
 
-# Function to delete test records from the database
-def delete_test_records(tracking_number):
+def delete_records(tracking_number):
     conn = connect_db()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM tracking WHERE tracking_number = ?", (tracking_number,))
     conn.commit()
     conn.close()
 
-# Path to WebDriver and URL of your index.html
-driver_path = "path/to/your/webdriver"
-url = "http://localhost/path/to/index.html"
+def test_tracking_system():
+    # Generate a random tracking number for testing
+    tracking_number = str(random.randint(1000, 9999))
 
-# Start a browser session
-driver = webdriver.Chrome(driver_path)
-driver.get(url)
+    # Step 1: Add two records with the same tracking number
+    add_record("Med1", tracking_number, "Location1", "2024-01-01")
+    add_record("Med2", tracking_number, "Location2", "2024-01-02")
 
-# Fill out and submit the form twice with the same tracking number
-for i in range(2):
-    medicine_id_field = driver.find_element_by_id("medicine_id")
-    tracking_number_field = driver.find_element_by_id("tracking_number")
-    location_field = driver.find_element_by_id("location")
+    # Step 2: Retrieve and print the records
+    records = get_records(tracking_number)
+    print(f"Records retrieved for tracking number {tracking_number}:")
+    for record in records:
+        print(record)
 
-    medicine_id_field.send_keys("TestMed" + str(i))
-    tracking_number_field.send_keys("Test1234")
-    location_field.send_keys("TestLocation" + str(i))
+    # Step 3: Delete the records
+    delete_records(tracking_number)
+    print(f"Records with tracking number {tracking_number} have been deleted.")
 
-    location_field.submit()
-    time.sleep(2)  # Wait for the form to submit
+    # Verify deletion
+    records_post_deletion = get_records(tracking_number)
+    if not records_post_deletion:
+        print("Deletion successful.")
+    else:
+        print("Deletion failed.")
 
-# Verify if the records were added
-if record_exists("Test1234"):
-    print("Test records were added successfully.")
-else:
-    print("Test records were not found in the database.")
-
-# Clean up: delete the test records
-delete_test_records("Test1234")
-print("Test records deleted.")
-
-# Close the browser
-driver.quit()
+if __name__ == "__main__":
+    test_tracking_system()
