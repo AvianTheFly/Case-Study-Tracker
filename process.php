@@ -3,24 +3,30 @@
 
 header('Content-Type: application/json');
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $medicineId = $_POST['medicine_id'];
-    $trackingNumber = $_POST['tracking_number'];
-    $location = $_POST['location'];
-    $date = date("Y-m-d H:i:s"); // Capture current date and time
+try {
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $medicineId = $_POST['medicine_id'];
+        $trackingNumber = $_POST['tracking_number'];
+        $location = $_POST['location'];
+        $date = date("Y-m-d H:i:s"); // Capture current date and time
 
-    $data = [
-        'medicine_id' => $medicineId,
-        'tracking_number' => $trackingNumber,
-        'location' => $location,
-        'date' => $date
-    ];
+        // Connect to SQLite database
+        $db = new PDO('sqlite:medicine_tracking.db');
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Convert to JSON and append to file
-    file_put_contents("data.txt", json_encode($data) . "\n", FILE_APPEND);
+        // Insert data into database
+        $stmt = $db->prepare('INSERT INTO tracking (medicine_id, tracking_number, location, date) VALUES (?, ?, ?, ?)');
+        $stmt->execute([$medicineId, $trackingNumber, $location, $date]);
 
-    echo json_encode(["message" => "Data saved successfully"]);
-} else {
-    echo json_encode(["message" => "No data submitted"]);
+        $response = ["message" => "Data saved successfully"];
+    } else {
+        $response = ["message" => "No data submitted"];
+    }
+} catch (PDOException $e) {
+    $response = ["message" => "Database error: " . $e->getMessage()];
+} catch (Exception $e) {
+    $response = ["message" => "Error: " . $e->getMessage()];
 }
+
+echo json_encode($response);
 ?>

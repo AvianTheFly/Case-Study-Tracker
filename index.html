@@ -5,20 +5,34 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
         $(document).ready(function(){
+            // Handle submission of tracking data
             $("#submitForm").submit(function(event){
-                event.preventDefault(); // Prevent default form submission
+                event.preventDefault();
                 $.ajax({
                     type: "POST",
                     url: "process.php",
                     data: $(this).serialize(),
                     success: function(response){
-                        // Parsing the JSON response from the server
-                        var responseData = JSON.parse(response);
-                        alert(responseData.message);
+                        alert(response);
                     },
                     error: function(xhr, status, error){
-                        // Handling any error during AJAX call
                         alert("Error: " + xhr.responseText);
+                    }
+                });
+            });
+
+            // Handle retrieval of tracking information
+            $("#trackingForm").submit(function(event){
+                event.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: "get_tracking_info.php",
+                    data: $(this).serialize(),
+                    success: function(response){
+                        $("#trackingResult").html(response);
+                    },
+                    error: function(xhr, status, error){
+                        $("#trackingResult").html("Error fetching data.");
                     }
                 });
             });
@@ -26,6 +40,7 @@
     </script>
 </head>
 <body>
+    <!-- Form for submitting new tracking data -->
     <form id="submitForm">
         <label for="medicine_id">Medicine ID:</label>
         <input type="text" id="medicine_id" name="medicine_id" required><br><br>
@@ -38,5 +53,18 @@
 
         <input type="submit" value="Submit">
     </form>
+
+    <hr>
+
+    <!-- Form for querying tracking information -->
+    <form id="trackingForm">
+        <label for="tracking_number_query">Enter Tracking Number:</label>
+        <input type="text" id="tracking_number_query" name="tracking_number_query" required>
+        <input type="submit" value="Get Tracking Info">
+    </form>
+
+    <div id="trackingResult">
+        <!-- Results will be displayed here -->
+    </div>
 </body>
 </html>
